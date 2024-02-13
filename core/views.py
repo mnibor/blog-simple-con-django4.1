@@ -5,12 +5,20 @@ from django.contrib.auth.models import User
 
 # Create your views here.
 def home(request):
-    posts_page = Paginator(Post.objects.filter(published=True), 2)
+
+    if not request.session.get('items_per_page'):
+        request.session['items_per_page'] = 2
+
+    if request.method == 'GET' and 'items_per_page' in request.GET:
+        request.session['items_per_page'] = int(request.GET['items_per_page'])
+
+    items_per_page = request.session['items_per_page']
+
+    posts_page = Paginator(Post.objects.filter(published=True), items_per_page)
     page = request.GET.get('page')
     posts = posts_page.get_page(page)
     aux = 'x' * posts.paginator.num_pages
 
-    print(type(posts.paginator.num_pages))
     return render(request,'core/home.html', {'posts':posts, 'aux':aux})
 
 # Detalle del Post
@@ -26,7 +34,7 @@ def post(request, post_id):
 def category(request, category_id):
     try:
         category = get_object_or_404(Category, id=category_id)
-        return render(request, 'core/category.html', {'category':category})    
+        return render(request, 'core/category.html', {'category':category})
     except:
         return render(request, 'core/404.html')
 
