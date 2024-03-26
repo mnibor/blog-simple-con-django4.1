@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from .models import Post, Category
 from django.contrib.auth.models import User
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 # Create your views here.
 def home(request):
@@ -26,7 +28,8 @@ def post(request, post_id):
     # post = Post.objects.get(id=post_id)
     try:
         post = get_object_or_404(Post, id=post_id)
-        return render(request, 'core/detail.html', {'post':post})
+        total_likes = post.total_likes()
+        return render(request, 'core/detail.html', {'post':post, 'total_likes':total_likes})
     except:
         return render(request, 'core/404.html')
 
@@ -68,3 +71,9 @@ def dates(request, month_id, year_id):
 
     posts = Post.objects.filter(published=True, created__month=month_id, created__year=year_id)
     return render(request, 'core/dates.html', {'posts':posts, 'month':meses[month_id], 'year':year_id})
+
+# Likes en un post
+def LikeView(request, pk):
+    post = get_object_or_404(Post, id=request.POST.get('post_id'))
+    post.likes.add(request.user)
+    return HttpResponseRedirect(reverse('post', args=[str(pk)]))

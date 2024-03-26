@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import home, post, category, author, dates
+from .views import home, post, category, author, dates, LikeView
 
 urlpatterns = [
     #PAGINA DE INICIO
@@ -14,5 +14,9 @@ urlpatterns = [
     #PAGINA FILTRADO POR FECHA
     path('dates/<int:month_id>/<int:year_id>', dates, name='dates'),
 
+    #DETALLE DEL POST
     path('post/<int:post_id>', post, name='post'),
+
+    #LIKES DE UN POST
+    path('like/<int:pk>', LikeView, name='like_post'),
 ]
