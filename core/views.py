@@ -29,7 +29,12 @@ def post(request, post_id):
     try:
         post = get_object_or_404(Post, id=post_id)
         total_likes = post.total_likes()
-        return render(request, 'core/detail.html', {'post':post, 'total_likes':total_likes})
+
+        liked = False
+        if post.likes.filter(id=request.user.id).exists():
+            liked = True
+
+        return render(request, 'core/detail.html', {'post':post, 'total_likes':total_likes, 'liked':liked})
     except:
         return render(request, 'core/404.html')
 
@@ -75,5 +80,10 @@ def dates(request, month_id, year_id):
 # Likes en un post
 def LikeView(request, pk):
     post = get_object_or_404(Post, id=request.POST.get('post_id'))
-    post.likes.add(request.user)
+
+    if post.likes.filter(id=request.user.id).exists():
+        post.likes.remove(request.user)
+    else:
+        post.likes.add(request.user)
+
     return HttpResponseRedirect(reverse('post', args=[str(pk)]))
